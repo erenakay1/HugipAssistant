@@ -1,0 +1,30 @@
+[project]
+name = "hugipassistant"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Eren Akay",email = "ernaky@icloud.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "beautifulsoup4 (>=4.14.3,<5.0.0)",
+    "langchain (>=1.2.7,<2.0.0)",
+    "langgraph (>=1.0.7,<2.0.0)",
+    "langchainhub (>=0.1.21,<0.2.0)",
+    "langchain-community (>=0.4.1,<0.5.0)",
+    "tavily-python (>=0.7.19,<0.8.0)",
+    "chromadb (>=1.4.1,<2.0.0)",
+    "python-dotenv (>=1.2.1,<2.0.0)",
+    "black (>=26.1.0,<27.0.0)",
+    "isort (>=7.0.0,<8.0.0)",
+    "pytest (>=9.0.2,<10.0.0)",
+    "langchain-openai (>=1.1.7,<2.0.0)",
+    "langchain-pinecone (>=0.2.13,<0.3.0)",
+    "pypdf (>=6.6.0,<7.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
