@@ -26,13 +26,26 @@ print("   ✅ Graph başarıyla oluşturuldu!")
 
 # Test soruları
 test_questions = [
+    # Genel
+    "Merhaba!",
+    "Kulübün amacı nedir?",
+    "Yönetim kurulu nasıl seçilir?",
+    "Dış İlişkiler ekibi ne yapar?",
     
+    # Etkinlikler (YENİ!)
+    "Social Media Talks etkinliği hakkında bilgi ver",
+    "Social Media Talks'ta kimler konuşacak?",
+    "Melih Aktaş kimdir?",
+    "DigitalMAG ne zaman yapılıyor?",
     "FESTUP'ta iş bulabilir miyim?",
     "HUGİP Akademi'de hangi eğitimler var?",
+    
+    # Web Search
+    "Yapay zeka hakkında bilgi ver",
 ]
 
 print("\n" + "=" * 60)
-print("2️⃣ Test Başlıyor:")
+print("2️⃣ Test Başlıyor (11 Soru):")
 print("=" * 60)
 
 for i, question in enumerate(test_questions, 1):
@@ -46,7 +59,8 @@ for i, question in enumerate(test_questions, 1):
         "generation": "",
         "documents": [],
         "decision": "",
-        "web_results": []
+        "web_results": [],
+        "iterations": 0  # YENİ!
     }
     
     # Run graph

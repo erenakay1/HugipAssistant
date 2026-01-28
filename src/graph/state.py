@@ -17,9 +17,11 @@ class GraphState(TypedDict):
         documents: Retrieved dökümanlar (RAG)
         decision: Router kararı ('rag', 'web_search', 'direct')
         web_results: Web arama sonuçları (opsiyonel)
+        iterations: Reflection loop sayacı
     """
     question: str
     generation: str
     documents: List[Document]
     decision: str
     web_results: List[str]
+    iterations: int
