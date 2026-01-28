@@ -18,6 +18,7 @@ class GraphState(TypedDict):
         decision: Router kararı ('rag', 'web_search', 'direct')
         web_results: Web arama sonuçları (opsiyonel)
         iterations: Reflection loop sayacı
+        session_id: Conversation session identifier
     """
     question: str
     generation: str
@@ -25,3 +26,4 @@ class GraphState(TypedDict):
     decision: str
     web_results: List[str]
     iterations: int
+    session_id: str

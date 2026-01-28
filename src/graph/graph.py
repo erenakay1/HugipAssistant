@@ -12,7 +12,34 @@ from src.graph.nodes import (
     WebSearchNode
 )
 from src.graph.nodes.reflection import ReflectionNode
+from src.services.memory_service import MemoryService
 
+_memory_service = MemoryService()
+
+def save_to_memory(state: GraphState) -> GraphState:
+    """
+    Final response'u memory'ye kaydet
+    Graph'ın END'inden önce çağrılır
+    """
+    session_id = state.get("session_id", "default")
+    
+    # User mesajı zaten router'da kaydedildi
+    # Şimdi assistant mesajını kaydet
+    sources = []
+    if state.get("documents"):
+        sources = [
+            doc.metadata.get("source", "Unknown") 
+            for doc in state["documents"]
+        ]
+    
+    _memory_service.add_assistant_message(
+        session_id=session_id,
+        content=state["generation"],
+        route=state.get("decision"),
+        sources=sources
+    )
+    
+    return state
 
 def build_graph():
     """
@@ -49,6 +76,7 @@ def build_graph():
     workflow.add_node("reflection", reflection_node)
     workflow.add_node("direct", direct_node)
     workflow.add_node("web_search", web_search_node)
+    workflow.add_node("save_to_memory", save_to_memory)
     
     # Edge'leri ekle
     workflow.add_edge(START, "router")
@@ -92,28 +120,31 @@ def build_graph():
         
         # Max iteration aşıldı mı?
         if iterations >= max_iterations:
-            return "end"
+            return "save_to_memory"
         
         # Son reflection sonucu neydi kontrol et
         # (ReflectionNode zaten regenerate etti, biz sadece flow'u yönetiyoruz)
         # Eğer iterations arttıysa demek ki ya grounded ya da regenerate edildi
         
         # Basit: Her zaman END'e git çünkü ReflectionNode içinde loop var
-        return "end"
+        return "save_to_memory"
     
     workflow.add_conditional_edges(
         "reflection",
         check_reflection,
         {
-            "end": END
+            "save_to_memory": "save_to_memory"
         }
     )
 
+    # Memory'den END'e
+    workflow.add_edge("save_to_memory", END)
+    
     # Web search flow
-    workflow.add_edge("web_search", END)
+    workflow.add_edge("web_search", "save_to_memory")
     
     # Direct flow
-    workflow.add_edge("direct", END)
+    workflow.add_edge("direct", "save_to_memory")
     
     # Compile
     return workflow.compile()
