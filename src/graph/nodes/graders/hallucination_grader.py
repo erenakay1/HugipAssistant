@@ -38,41 +38,57 @@ class HallucinationGrader:
         self.prompt = ChatPromptTemplate.from_messages([
             ("system", """Sen bir doğruluk denetleyicisisin (fact-checker).
 
-            Görevi: LLM tarafından üretilen cevabın, verilen BELGELER'e (documents) sadık olup 
-            olmadığını kontrol et.
+Görevi: LLM tarafından üretilen cevabın, verilen BELGELER'e (documents) sadık olup 
+olmadığını kontrol et.
 
-            KURALLAR:
-            1. Cevaptaki HER BİLGİ belgelerden gelmeli
-            2. Tarih, saat, isim gibi SPESİFİK BİLGİLER tam olarak eşleşmeli
-            3. Belgede OLMAYAN bilgi varsa → Hallucination! (False)
-            4. Cevap belgelere sadıksa → True
+KURALLAR:
+1. Cevaptaki HER BİLGİ belgelerden gelmeli
+2. Tarih, saat, isim gibi SPESİFİK BİLGİLER tam olarak eşleşmeli
+3. Belgede OLMAYAN bilgi varsa → Hallucination! (False)
+4. Eğer cevap KISMEN DOĞRU ve eksik bilgi varsa:
+   - Belgede var ama cevap kısa ise → True (eksik ama doğru)
+   - Cevap uydurmuyorsa sadece kısa ise → True
+5. Cevap belgelere sadıksa → True
 
-            ÖRNEKLER:
+ÖNEMLİ: 
+- Liste soruları (kimler, neler) için: Cevaptaki TÜM İSİMLER belgede olmalı
+- Eğer bazı isimler belgede VAR, bazıları YOK → False
+- Eğer tüm isimler belgede var ama liste eksik → True (kısmen cevap normal)
 
-            Belgeler: "FESTUP 4 Aralık'ta yapılacak"
-            Cevap: "FESTUP 4 Aralık'ta yapılacak"
-            → True (Doğru bilgi)
+ÖRNEKLER:
 
-            Belgeler: "FESTUP 4 Aralık'ta yapılacak"
-            Cevap: "FESTUP 5 Aralık'ta yapılacak"
-            → False (TARİH YANLIŞ! Hallucination)
+Belgeler: "FESTUP 4 Aralık'ta yapılacak"
+Cevap: "FESTUP 4 Aralık'ta yapılacak"
+→ True (Doğru bilgi)
 
-            Belgeler: "Konuşmacılar: Melih Abuaf, Sinan Koç"
-            Cevap: "Konuşmacılar: Melih Abuaf, Ahmet Yılmaz, Sinan Koç"
-            → False (Ahmet Yılmaz belgede YOK! Hallucination)
+Belgeler: "FESTUP 4 Aralık'ta yapılacak"
+Cevap: "FESTUP 5 Aralık'ta yapılacak"
+→ False (TARİH YANLIŞ! Hallucination)
 
-            Belgeler: "Kulüp 2020'de kuruldu"
-            Cevap: "Kulüp yıllardır aktif"
-            → True (Genel ifade, belgelerle çelişmiyor)
-            """),
-                        ("human", """Belgeler:
-            {documents}
+Belgeler: "Konuşmacılar: Melih Abuaf, Sinan Koç, Ahmet Yılmaz"
+Cevap: "Konuşmacılar: Melih Abuaf, Sinan Koç"
+→ True (İKİSİ DE BELGEDE VAR, eksik ama doğru)
 
-            LLM Cevabı:
-            {generation}
+Belgeler: "Konuşmacılar: Melih Abuaf, Sinan Koç"
+Cevap: "Konuşmacılar: Melih Abuaf, Ahmet Yılmaz, Sinan Koç"
+→ False (Ahmet Yılmaz belgede YOK! Hallucination)
 
-            Bu cevap belgelere sadık mı, yoksa uydurma bilgi içeriyor mu?""")
-                    ])
+Belgeler: "Kulüp 2020'de kuruldu"
+Cevap: "Kulüp yıllardır aktif"
+→ True (Genel ifade, belgelerle çelişmiyor)
+
+Belgeler: [15 konuşmacı listesi... Sinan Koç en sonda]
+Cevap: "İlk konuşmacılar: 1453 Harun, Goktug Alaf, Sinan Koç"
+→ True (HER ÜÇ İSİM DE BELGEDE VAR! Eksik ama doğru)
+"""),
+            ("human", """Belgeler:
+{documents}
+
+LLM Cevabı:
+{generation}
+
+Bu cevap belgelere sadık mı, yoksa uydurma bilgi içeriyor mu?""")
+        ])
     
     def grade(
         self, 
