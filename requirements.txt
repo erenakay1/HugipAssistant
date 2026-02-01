@@ -15,7 +15,7 @@ langchain-openai==0.0.5
 langchain-pinecone==0.0.3
 langchain-community==0.0.38
 langgraph==0.0.69
-langsmith==0.1.0
+langsmith>=0.1.17
 
 # Vector Store
 pinecone-client==3.0.0
