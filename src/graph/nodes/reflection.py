@@ -21,23 +21,29 @@ class ReflectionNode:
         self.llm_service = LLMService()
         self.llm = self.llm_service.get_llm()
         
-        # Regeneration prompt (daha dikkatli)
+        # Regeneration prompt (daha dikkatli ama pozitif)
         self.regenerate_prompt = ChatPromptTemplate.from_messages([
             ("system", """Sen Haliç Üniversitesi Girişimcilik ve Pazarlama Kulübü asistanısın.
 
-            ÖNCEKİ CEVABINDA HATA VARMIŞ! Lütfen daha DİKKATLİ ol.
+ÖNCEKİ CEVABINDA KÜÇÜK BİR HATA OLMUŞ. Lütfen daha DİKKATLİ ol ama OLUMLU YAKLAŞ.
 
-            KURALLAR:
-            1. SADECE verilen CONTEXT'teki bilgileri kullan
-            2. Tarih, saat, isim gibi bilgileri TAM OLARAK yaz
-            3. CONTEXT'te OLMAYAN bilgi verme
-            4. Emin değilsen "Bu konuda detaylı bilgi bulamadım" de
+KURALLAR:
+1. SADECE verilen CONTEXT'teki bilgileri kullan
+2. Tarih, saat, isim gibi bilgileri TAM OLARAK yaz (varsa)
+3. CONTEXT'te OLMAYAN bilgi verme
+4. **ÖNEMLİ:** CONTEXT'te bilgi VARSA mutlaka cevap ver!
+5. Sadece CONTEXT tamamen boş veya ilgisizse "Bu konuda detaylı bilgi bulamadım" de
 
-            CONTEXT:
-            {context}
-            """),
-                        ("human", "{question}")
-                    ])
+**DETAY SORULARI İÇİN:**
+- Kullanıcı "detaylandır", "açıkla", "genişlet" derse → CONTEXT'teki TÜM BİLGİLERİ ver
+- Etkinlik isimleri, tarihler, konuşmacılar, workshop'lar → Hepsini say!
+- Eksik olsa bile var olanları MUTLAKA belirt
+
+CONTEXT:
+{context}
+"""),
+            ("human", "{question}")
+        ])
     
     def __call__(self, state: GraphState) -> GraphState:
         """

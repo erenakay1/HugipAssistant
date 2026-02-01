@@ -6,12 +6,14 @@ from langchain_core.prompts import ChatPromptTemplate
 from src.graph.state import GraphState
 from src.services.vectorstore_service import VectorStoreService
 from src.services.llm_services import LLMService
+from src.services.memory_service import MemoryService
 
 class RetrieveNode:
     """Pinecone'dan döküman getiren node"""
     
     def __init__(self):
         self.vectorstore_service = VectorStoreService()
+        self.memory_service = MemoryService()
     
     def __call__(self, state: GraphState) -> GraphState:
         """
@@ -23,8 +25,27 @@ class RetrieveNode:
         Returns:
             Updated state with documents
         """
+        session_id = state.get("session_id", "default")
+        question = state["question"]
+        
+        # Memory'den context al
+        last_topic = self.memory_service.get_last_topic(session_id)
+        
+        # Query'yi genişlet (eğer takip sorusu ise)
+        # "detaylandır", "açıkla", "anlat" gibi kelimeler topic ile birleştir
+        expanded_query = question
+        
+        if last_topic and any(word in question.lower() for word in [
+            "detay", "açıkla", "anlat", "genişlet", "daha fazla", 
+            "kimler", "ne zaman", "nerede", "nasıl", "kaç"
+        ]):
+            # Topic'i query'e ekle
+            expanded_query = f"{last_topic} {question}"
+            print(f"\n   🔍 Query expanded: '{question}' → '{expanded_query}'")
+        
+        # Retrieve documents
         documents = self.vectorstore_service.retrieve_documents(
-            query=state["question"]
+            query=expanded_query
         )
         
         return {
@@ -47,7 +68,7 @@ CONTEXT'teki dökümanları kullanarak soruyu yanıtla.
 KURALLAR:
 1. Sadece CONTEXT'teki bilgileri kullan
 2. ETKİNLİK sorularında MUTLAKA spesifik isimlerini belirt (FESTUP, Social Media Talks, DigitalMAG, HUGİP Akademi vb.)
-3. "Etkinlikler", "festivaller", "konferanslar" gibi genel ifadeler YERİNE구체 isimleri say
+3. "Etkinlikler", "festivaller", "konferanslar" gibi genel ifadeler YERİNE etkinlik isimleri say
 4. Örnek: "FESTUP, Social Media Talks ve DigitalMAG gibi etkinlikler düzenliyoruz"
 5. Eğer bilgi yoksa "Bu konuda dökümanlarımda detaylı bilgi bulamadım" de
 6. Kısa, öz ve samimi ol
