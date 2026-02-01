@@ -29,7 +29,8 @@ class VectorStoreService:
     def retrieve_documents(
         self, 
         query: str, 
-        k: int = None
+        k: int = None,
+        use_mmr: bool = True
     ) -> List[Document]:
         """
         Pinecone'dan ilgili dökümanları getirir
@@ -37,14 +38,28 @@ class VectorStoreService:
         Args:
             query: Arama sorgusu
             k: Kaç döküman getirilecek (default: settings.RETRIEVAL_K)
+            use_mmr: MMR (Maximum Marginal Relevance) kullan - çeşitlilik için
             
         Returns:
             List[Document]: Retrieved dökümanlar
         """
         k = k or self.settings.RETRIEVAL_K
-        retriever = self.vectorstore.as_retriever(
-            search_kwargs={"k": k}
-        )
+        if use_mmr:
+            # MMR: Relevance + Diversity
+            # fetch_k: İlk kaç dökümanı çek (sonra k tanesini seç)
+            retriever = self.vectorstore.as_retriever(
+                search_type="mmr",
+                search_kwargs={
+                    "k": k,
+                    "fetch_k": k * 3,  # 3x daha fazla getir, sonra en iyilerini seç
+                    "lambda_mult": 0.7  # 0.7 = relevance ağırlıklı, 0.3 = diversity
+                }
+            )
+        else:
+            # Standard similarity search
+            retriever = self.vectorstore.as_retriever(
+                search_kwargs={"k": k}
+            )
         return retriever.invoke(query)
     
     def similarity_search_with_score(

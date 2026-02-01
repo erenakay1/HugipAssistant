@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     TAVILY_API_KEY: str = ""
     
     # RAG Settings
-    RETRIEVAL_K: int = 6
+    RETRIEVAL_K: int = 8
     CHUNK_SIZE: int = 1000
     CHUNK_OVERLAP: int = 200
     

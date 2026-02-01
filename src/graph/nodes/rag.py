@@ -46,10 +46,15 @@ CONTEXT'teki dökümanları kullanarak soruyu yanıtla.
 
 KURALLAR:
 1. Sadece CONTEXT'teki bilgileri kullan
-2. Eğer bilgi yoksa "Bu konuda dökümanlarımda detaylı bilgi bulamadım" de
-3. Kısa, öz ve samimi ol
-4. Kaynak belirtmeye gerek yok (otomatik gösterilecek)
-5. Türkçe sorulara Türkçe, İngilizce sorulara İngilizce cevap ver
+2. ETKİNLİK sorularında MUTLAKA spesifik isimlerini belirt (FESTUP, Social Media Talks, DigitalMAG, HUGİP Akademi vb.)
+3. "Etkinlikler", "festivaller", "konferanslar" gibi genel ifadeler YERİNE구체 isimleri say
+4. Örnek: "FESTUP, Social Media Talks ve DigitalMAG gibi etkinlikler düzenliyoruz"
+5. Eğer bilgi yoksa "Bu konuda dökümanlarımda detaylı bilgi bulamadım" de
+6. Kısa, öz ve samimi ol
+7. Kaynak belirtmeye gerek yok (otomatik gösterilecek)
+8. Türkçe sorulara Türkçe, İngilizce sorulara İngilizce cevap ver
+
+ÖNEMLİ: Context'te etkinlik/proje isimleri görüyorsan, bunları cevabında MUTLAKA kullan!
 
 CONTEXT:
 {context}

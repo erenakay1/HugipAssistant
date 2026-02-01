@@ -50,6 +50,17 @@ KURALLAR:
    - Cevap uydurmuyorsa sadece kısa ise → True
 5. Cevap belgelere sadıksa → True
 
+**ÇOK ÖNEMLİ - "BİLGİ YOK" CEVAPLARI:**
+- Eğer belgeler BİLGİ İÇERİYOR ama cevap "bilgi bulamadım" diyorsa → FALSE (Hallucination!)
+- Örnek: Belgede "FESTUP, Social Media Talks" var, cevap "bilgi yok" diyor → FALSE
+- Bu tür cevaplar YANLIŞ çünkü belgede bilgi VAR ama LLM kullanmıyor!
+
+**ÖNEMLİ - ETKİNLİK/PROJE İSİMLERİ:**
+- Belgede etkinlik isimleri geçiyorsa (FESTUP, DigitalMAG vb.), cevap bunları belirtmelidir
+- Eğer belgede "FESTUP" var ama cevap belirtmiyorsa → Eksik ama True (kısmen cevap)
+- Eğer belgede "FESTUP" YOK ama cevap "FESTUP var" diyorsa → FALSE (Hallucination!)
+- Eğer belgede birden fazla etkinlik var, cevap sadece bazılarını sayıyorsa → True (eksik ama doğru)
+
 ÖNEMLİ: 
 - Liste soruları (kimler, neler) için: Cevaptaki TÜM İSİMLER belgede olmalı
 - Eğer bazı isimler belgede VAR, bazıları YOK → False
@@ -64,6 +75,10 @@ Cevap: "FESTUP 4 Aralık'ta yapılacak"
 Belgeler: "FESTUP 4 Aralık'ta yapılacak"
 Cevap: "FESTUP 5 Aralık'ta yapılacak"
 → False (TARİH YANLIŞ! Hallucination)
+
+Belgeler: "FESTUP, Social Media Talks, DigitalMAG"
+Cevap: "Bu konuda detaylı bilgi bulamadım"
+→ False (Belgede BİLGİ VAR ama kullanmamış! Hallucination)
 
 Belgeler: "Konuşmacılar: Melih Abuaf, Sinan Koç, Ahmet Yılmaz"
 Cevap: "Konuşmacılar: Melih Abuaf, Sinan Koç"
@@ -105,11 +120,18 @@ Bu cevap belgelere sadık mı, yoksa uydurma bilgi içeriyor mu?""")
         Returns:
             GradeHallucination: binary_score (True/False) ve reasoning
         """
-        # Documents'ları string'e çevir
+        # Documents'ları string'e çevir (KAYNAK İSİMLERİYLE)
         docs_content = "\n\n---\n\n".join([
-            f"[Döküman {i+1}]\n{doc.page_content}"
+            f"[Döküman {i+1} - Kaynak: {doc.metadata.get('source', 'Unknown')}]\n{doc.page_content[:1500]}"  # İlk 1500 karakter
             for i, doc in enumerate(documents)
         ])
+        
+        # Debugging: Döküman kaynaklarını log'la
+        print(f"   📄 Grading with {len(documents)} documents:")
+        for i, doc in enumerate(documents):
+            source = doc.metadata.get('source', 'Unknown')
+            content_preview = doc.page_content[:100].replace('\n', ' ')
+            print(f"      {i+1}. {source}: {content_preview}...")
         
         # Grade
         chain = self.prompt | self.llm
