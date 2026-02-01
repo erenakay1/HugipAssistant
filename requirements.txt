@@ -1,37 +1,22 @@
-# Core Framework
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-pydantic==2.5.3
-pydantic-settings==2.1.0
-python-dotenv==1.0.0
-
-# Streamlit (Chat Interface)
-streamlit==1.29.0
-pandas==2.1.4
-
-# LangChain & LangGraph
-langchain>=0.2.0
-langchain-openai==0.0.5
-langchain-pinecone==0.0.3
-langchain-community==0.0.38
-langgraph==0.0.69
-langsmith>=0.1.17
-
-# Vector Store
-pinecone-client==3.0.0
-
-# Search
-tavily-python==0.3.0
-
-# Utilities
-python-multipart==0.0.6
-httpx==0.26.0
-
-# Testing
-pytest==7.4.3
-pytest-asyncio==0.21.1
-pytest-cov==4.1.0
-
-# Development
-black==23.12.1
-ruff==0.1.9
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+python-dotenv
+streamlit
+pandas
+langchain
+langchain-openai
+langchain-pinecone
+langchain-community
+langgraph
+langsmith
+pinecone-client
+tavily-python
+python-multipart
+httpx
+pytest
+pytest-asyncio
+pytest-cov
+black
+ruff
