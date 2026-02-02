@@ -493,7 +493,7 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
         })
         
         # Log to database
-        st.session_state.db.log_chat(
+        st.session_state.db.add_chat_history(
             session_id=st.session_state.session_id,
             question=last_user_message,
             answer=result["generation"],
