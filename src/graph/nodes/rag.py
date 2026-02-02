@@ -37,7 +37,9 @@ class RetrieveNode:
         
         if last_topic and any(word in question.lower() for word in [
             "detay", "açıkla", "anlat", "genişlet", "daha fazla", 
-            "kimler", "ne zaman", "nerede", "nasıl", "kaç"
+            "kimler", "ne zaman", "nerede", "nasıl", "kaç",
+            "yeni", "hazırla", "güncelle", "değiştir", "tekrar",
+            "aynı", "o", "şu", "bunun"
         ]):
             # Topic'i query'e ekle
             expanded_query = f"{last_topic} {question}"
@@ -68,7 +70,7 @@ CONTEXT'teki dökümanları kullanarak soruyu yanıtla.
 KURALLAR:
 1. Sadece CONTEXT'teki bilgileri kullan
 2. ETKİNLİK sorularında MUTLAKA spesifik isimlerini belirt (FESTUP, Social Media Talks, DigitalMAG, HUGİP Akademi vb.)
-3. "Etkinlikler", "festivaller", "konferanslar" gibi genel ifadeler YERİNE etkinlik isimleri say
+3. "Etkinlikler", "festivaller", "konferanslar" gibi genel ifadeler YERİNE구체 isimleri say
 4. Örnek: "FESTUP, Social Media Talks ve DigitalMAG gibi etkinlikler düzenliyoruz"
 5. Eğer bilgi yoksa "Bu konuda dökümanlarımda detaylı bilgi bulamadım" de
 6. Kısa, öz ve samimi ol

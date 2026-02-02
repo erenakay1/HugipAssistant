@@ -41,32 +41,63 @@ Soruyu analiz et ve uygun veri kaynağına yönlendir:
   * İş/staj fırsatları, networking, katılım şartları
   * İletişim bilgileri
   
-- 'web_search': Güncel haberler, genel bilgiler, kulüp dışı konular
-  * Güncel haberler (bugünkü hava, son dakika)
-  * Genel tanımlar (yapay zeka nedir, blockchain nedir)
-  * Spor sonuçları, borsa bilgileri vb.
+- 'web_search': SADECE HUGİP ile bağlantılı ama güncel bilgi gerekli olan sorular
+  * "HUGİP'in son etkinliği ne zaman?" (güncel bilgi)
+  * "HUGİP Instagram'ı ne zaman güncellendi?" (güncel)
   
-- 'direct': Basit selamlamalar, teşekkürler, genel sohbet
+- 'direct': Selamlamalar, teşekkürler VE HUGİP DIŞI KONULAR
+  * "Merhaba", "Selam", "Teşekkürler"
+  * Oyun oynamak, rol yapma
+  * HUGİP ile ilgisi olmayan sorular:
+    - "Türkiye'nin nüfusu nedir?"
+    - "Instagram'da follower kazanmak"
+    - "Python script yaz"
+    - Genel bilgi, homework, coding vb.
 
 ÖNEMLİ: 
-- "Kulüp", "etkinlik", "üye", "katılım", "amaç", "vizyon" → 'rag'
-- Etkinlik isimleri (DigitalMAG, FESTUP, Social Media Talks, HUGİP Akademi) → 'rag'
+- Eğer soru bir TASK/ACTION ise → HER ZAMAN 'direct'
+  Task kelimeleri: yaz, oluştur, tasarla, code, script, yap, hazırla, düzenle, güncelle, değiştir, oluşturalım, hazırlayalım, yeniden yaz, yapayım, yapayalım
+  * "HUGİP için Python script yaz" → direct (task!)
+  * "HUGİP logo tasarla" → direct (task!)
+  * "Etkinlik için poster yaz" → direct (task!)
+  * "Bir etkinlik takvimi hazırlayalım" → direct (task! "hazırlayalım")
+  * Yani yukarıdaki task kelimelerinden HERHANGI BİRİ varsa → direct
+- Eğer soru BİLGI SORISI ise (nedir, kim, ne zaman, nasıl, nerede) → 'rag'
+  * "HUGİP nedir?" → rag (bilgi sorusu)
+  * "FESTUP ne zaman?" → rag (bilgi sorusu)
+- "Kulüp", "etkinlik", "üye" kelimesi olsa bile task ise → direct
+- Etkinlik isimleri (DigitalMAG, FESTUP, Social Media Talks, HUGİP Akademi) + bilgi sorusu → 'rag'
 - "Ne zaman?", "Kimler?", "Nerede?" gibi takip soruları → Önceki context'e bak!
   * Eğer önceki konuşmada etkinlik/kulüp konuşuluyorsa → 'rag'
   * Eğer önceki konuşmada genel bir konu varsa → 'web_search'
 
 ÖRNEKLER:
-✓ "Kulübün amacı nedir?" → rag
-✓ "FESTUP nedir?" → rag
+✓ "Kulübün amacı nedir?" → rag (bilgi sorusu)
+✓ "FESTUP nedir?" → rag (bilgi sorusu)
 ✓ [Önceki: "FESTUP nedir?"] "Ne zaman yapılıyor?" → rag (FESTUP context'i)
 ✓ [Önceki: "Social Media Talks"] "Kimler konuşacak?" → rag (Etkinlik context'i)
-✓ "Merhaba!" → direct
+✓ "Merhaba!" → direct (selam)
+✓ "Türkiye'nin nüfusu nedir?" → direct (HUGİP dışı)
+✓ "Instagram'da follower kazanmak?" → direct (HUGİP dışı)
+✓ "Oyun oynayalım mı?" → direct (HUGİP dışı)
+✓ "HUGİP için Python script yaz" → direct (TASK! "yaz" kelimesi var)
+✓ "Etkinlik için poster tasarla" → direct (TASK! "tasarla" kelimesi var)
+✓ "HUGİP logo oluştur" → direct (TASK! "oluştur" kelimesi var)
+✓ "Bir etkinlik takvimi hazırlayalım" → direct (TASK! "hazırlayalım")
+✓ "Yenisini hazırlayalım mı" → direct (TASK! "hazırlayalım")
+✓ "HUGİP'in son etkinlik tarihi?" → web_search (HUGİP + güncel)
 """),
             ("human", """CONVERSATION HISTORY (Son mesajlar):
 {history}
 
 ŞİMDİKİ SORU:
 {question}
+
+ÖNEMLİ NOTLAR:
+- Eğer history'de bir ETKİNLİK (FESTUP, Social Media Talks, vb.) veya KULÜP konusu varsa,
+  takip soruları ("ne zaman?", "kimler?", "kaç kişi?", "iş var mı?") o konuyla ilgilidir!
+- Örnek: Önceki mesajlarda "FESTUP" veya "etkinlik" geçiyorsa, 
+  "İş bulabilir miyim?" = "FESTUP'ta iş bulabilir miyim?" demektir → 'rag'
 
 Bu soruyu hangi datasource'a yönlendirmeliyim?""")
         ])
@@ -83,12 +114,14 @@ Bu soruyu hangi datasource'a yönlendirmeliyim?""")
         """
         session_id = state.get("session_id", "default")
         
-        # User mesajını memory'ye kaydet (ilk kez)
+        # User mesajını memory'ye kaydet
+        # Bu şekilde her yerde (test, API) aynı davranış olur
         self.memory_service.add_user_message(session_id, state["question"])
         
         # Conversation history'yi al (son 6 mesaj = 3 turn)
         history = self.memory_service.get_context(session_id, last_n=6)
-
+        
+        # Son topic'i al (FESTUP, Social Media Talks vb.)
         last_topic = self.memory_service.get_last_topic(session_id)
         
         # History yoksa boş string
@@ -98,7 +131,7 @@ Bu soruyu hangi datasource'a yönlendirmeliyim?""")
         # Topic varsa history'ye ekle
         if last_topic:
             history = f"[DEVAM EDEN KONU: {last_topic}]\n\n{history}"
-
+        
         chain = self.prompt | self.llm
         decision = chain.invoke({
             "question": state["question"],
